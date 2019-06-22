@@ -41,7 +41,7 @@ module.exports = "<!--The content below is only a placeholder and can be replace
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-module.exports = "\n<agm-map\n  [latitude]=\"lat\"\n  [longitude]=\"lng\"\n  [zoom]=\"zoom\"\n  [disableDefaultUI]=\"false\"\n  [zoomControl]=\"false\">\n\n  <agm-marker-cluster\n    imagePath=\"https://raw.githubusercontent.com/googlemaps/v3-utility-library/master/markerclustererplus/images/m\"\n  >\n    <agm-marker\n      *ngFor=\"let m of (postRepositoryService.all$ | async); let i = index\"\n      (markerClick)=\"clickedMarker(m.label, i)\"\n      [latitude]=\"m.lat\"\n      [longitude]=\"m.lng\"\n      [label]=\"i + 1\">\n\n      <agm-info-window [maxWidth]=\"400\">\n        <div class=\"card\">\n          <div class=\"car-number\"><b>{{m.label}}</b></div>\n          <div class=\"clear\"></div>\n          <div>\n            <img width=\"100%\" [src]=\"m.image\">\n          </div>\n        </div>\n      </agm-info-window>\n\n    </agm-marker>\n  </agm-marker-cluster>\n\n</agm-map>\n"
+module.exports = "\n<agm-map\n  [latitude]=\"lat\"\n  [longitude]=\"lng\"\n  [zoom]=\"zoom\"\n  [disableDefaultUI]=\"false\"\n  [zoomControl]=\"false\">\n\n  <agm-marker-cluster\n    imagePath=\"https://raw.githubusercontent.com/googlemaps/v3-utility-library/master/markerclustererplus/images/m\"\n  >\n    <agm-marker\n      *ngFor=\"let m of (postRepositoryService.all$ | async); let i = index; trackBy: trackById\"\n      [latitude]=\"m.lat\"\n      [longitude]=\"m.lng\"\n      [label]=\"i + 1\">\n\n      <agm-info-window [maxWidth]=\"400\">\n        <div class=\"card\">\n          <div class=\"car-number\"><b>{{m.label}}</b></div>\n          <div class=\"clear\"></div>\n          <div>\n            <img width=\"100%\" [src]=\"m.image\">\n          </div>\n          <button (click)=\"markAsDone(m.id)\">Done</button>\n        </div>\n      </agm-info-window>\n\n    </agm-marker>\n  </agm-marker-cluster>\n\n</agm-map>\n"
 
 /***/ }),
 
@@ -177,9 +177,6 @@ var MapComponent = /** @class */ (function () {
         this.lng = 35.018477;
         this.sub = new rxjs__WEBPACK_IMPORTED_MODULE_3__["Subscription"]();
     }
-    MapComponent.prototype.clickedMarker = function (label, index) {
-        console.log("clicked the marker: " + (label || index));
-    };
     MapComponent.prototype.ngOnInit = function () {
         var _this = this;
         this.sub.add(this.userLocationService.coord$.subscribe(function (_a) {
@@ -188,10 +185,17 @@ var MapComponent = /** @class */ (function () {
             _this.lng = lng;
         }));
     };
+    MapComponent.prototype.markAsDone = function (id) {
+        this.postRepositoryService.markAsDone(id);
+    };
+    MapComponent.prototype.trackById = function (a) {
+        return a.id;
+    };
     MapComponent = tslib__WEBPACK_IMPORTED_MODULE_0__["__decorate"]([
         Object(_angular_core__WEBPACK_IMPORTED_MODULE_1__["Component"])({
             selector: 'app-map',
             template: __webpack_require__(/*! raw-loader!./map.component.html */ "./node_modules/raw-loader/index.js!./src/app/map/map.component.html"),
+            changeDetection: _angular_core__WEBPACK_IMPORTED_MODULE_1__["ChangeDetectionStrategy"].OnPush,
             styles: [__webpack_require__(/*! ./map.component.css */ "./src/app/map/map.component.css")]
         }),
         tslib__WEBPACK_IMPORTED_MODULE_0__["__metadata"]("design:paramtypes", [_services_user_location_user_location_service__WEBPACK_IMPORTED_MODULE_2__["UserLocationService"],
@@ -235,7 +239,7 @@ var MapModule = /** @class */ (function () {
             imports: [
                 _angular_common__WEBPACK_IMPORTED_MODULE_2__["CommonModule"],
                 _agm_core__WEBPACK_IMPORTED_MODULE_4__["AgmCoreModule"].forRoot({
-                    apiKey: 'AIzaSyAvHByMOVC1HHIcijAzWsaD4m3HECMC1oo'
+                    apiKey: 'AIzaSyAi_K-aOvGFhhBTwwJH4Hwnzrbo-CHYTwY'
                 }),
                 _agm_js_marker_clusterer__WEBPACK_IMPORTED_MODULE_5__["AgmJsMarkerClustererModule"]
             ],
@@ -267,6 +271,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! tslib */ "./node_modules/tslib/tslib.es6.js");
 /* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @angular/core */ "./node_modules/@angular/core/fesm5/core.js");
 /* harmony import */ var _angular_common_http__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @angular/common/http */ "./node_modules/@angular/common/fesm5/http.js");
+/* harmony import */ var rxjs_operators__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! rxjs/operators */ "./node_modules/rxjs/_esm5/operators/index.js");
+
 
 
 
@@ -275,7 +281,19 @@ var PostHttpService = /** @class */ (function () {
         this.http = http;
     }
     PostHttpService.prototype.requestForList = function () {
-        return this.http.get('');
+        return this.http.get('http://10.4.137.48:8000/get_all/')
+            .pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_3__["map"])(function (res) { return res.map(function (data) { return ({
+            lat: (JSON.parse(data.location)).latitude,
+            lng: (JSON.parse(data.location)).longitude,
+            label: data.car_number,
+            image: data.photo_url,
+            id: data.id,
+        }); }); }));
+    };
+    PostHttpService.prototype.markAsDone = function (id) {
+        this.http.patch("http://10.4.137.48:8000/process/" + id + "/", {
+            processed: true,
+        }).subscribe();
     };
     PostHttpService = tslib__WEBPACK_IMPORTED_MODULE_0__["__decorate"]([
         Object(_angular_core__WEBPACK_IMPORTED_MODULE_1__["Injectable"])({
@@ -312,14 +330,19 @@ __webpack_require__.r(__webpack_exports__);
 
 var PostRepositoryService = /** @class */ (function () {
     function PostRepositoryService(postHttpService) {
+        var _this = this;
         this.postHttpService = postHttpService;
         this.store$ = new rxjs__WEBPACK_IMPORTED_MODULE_3__["BehaviorSubject"]([]);
+        this.done = new Set();
         this.refreshList();
+        setInterval(function () {
+            _this.refreshList();
+        }, 4000);
     }
     PostRepositoryService.prototype.refreshList = function () {
         var _this = this;
         this.postHttpService.requestForList()
-            .pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_4__["catchError"])(function () { return Object(rxjs__WEBPACK_IMPORTED_MODULE_3__["of"])([
+            .pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_4__["catchError"])(function (e) { return Object(rxjs__WEBPACK_IMPORTED_MODULE_3__["of"])([
             {
                 label: 'Text',
                 lat: 48.473567,
@@ -331,12 +354,18 @@ var PostRepositoryService = /** @class */ (function () {
     };
     Object.defineProperty(PostRepositoryService.prototype, "all$", {
         get: function () {
+            var _this = this;
             return this.store$
-                .asObservable();
+                .asObservable()
+                .pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_4__["map"])(function (list) { return list.filter(function (el) { return !_this.done.has(el.id); }); }));
         },
         enumerable: true,
         configurable: true
     });
+    PostRepositoryService.prototype.markAsDone = function (id) {
+        this.done.add(id);
+        this.postHttpService.markAsDone(id);
+    };
     PostRepositoryService = tslib__WEBPACK_IMPORTED_MODULE_0__["__decorate"]([
         Object(_angular_core__WEBPACK_IMPORTED_MODULE_1__["Injectable"])({
             providedIn: 'root'
