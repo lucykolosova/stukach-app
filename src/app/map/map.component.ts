@@ -1,7 +1,6 @@
-import {Component, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, Component, OnInit} from '@angular/core';
 import {UserLocationService} from './services/user-location/user-location.service';
-import {BehaviorSubject, Subscription} from 'rxjs';
-import {Marker} from './services/post-repository/post-http.service';
+import {Subscription} from 'rxjs';
 import {PostRepositoryService} from './services/post-repository/post-repository.service';
 
 // just an interface for type safety.
@@ -9,7 +8,8 @@ import {PostRepositoryService} from './services/post-repository/post-repository.
 @Component({
   selector: 'app-map',
   templateUrl: './map.component.html',
-  styleUrls: ['./map.component.css']
+  styleUrls: ['./map.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MapComponent implements OnInit {
 
@@ -30,10 +30,6 @@ export class MapComponent implements OnInit {
 
   }
 
-  clickedMarker(label: string, index: number) {
-    console.log(`clicked the marker: ${label || index}`);
-  }
-
   ngOnInit(): void {
     this.sub.add(
       this.userLocationService.coord$.subscribe(([lat, lng]) => {
@@ -41,6 +37,10 @@ export class MapComponent implements OnInit {
         this.lng = lng;
       })
     );
+  }
+
+  markAsDone(id: number) {
+    this.postRepositoryService.markAsDone(id);
   }
 }
 

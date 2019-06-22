@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {Marker, PostHttpService} from './post-http.service';
 import {BehaviorSubject, of} from 'rxjs';
-import {catchError, tap} from 'rxjs/operators';
+import {catchError, filter, map, tap} from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -9,6 +9,7 @@ import {catchError, tap} from 'rxjs/operators';
 export class PostRepositoryService {
 
   private store$ = new BehaviorSubject<Marker[]>([]);
+  private done = new Set<number>();
 
   constructor(
     private postHttpService: PostHttpService
@@ -19,7 +20,7 @@ export class PostRepositoryService {
   refreshList() {
     this.postHttpService.requestForList()
       .pipe(
-        catchError(() => of([
+        catchError((e) => of([
           {
             label: 'Text',
             lat: 48.473567,
@@ -33,6 +34,13 @@ export class PostRepositoryService {
 
   get all$() {
     return this.store$
-      .asObservable();
+      .asObservable()
+      .pipe(
+        map(list => list.filter((el: Marker) => !this.done.has(el.id))),
+      );
+  }
+
+  markAsDone(id: number) {
+    this.done.add(id);
   }
 }
