@@ -15,6 +15,9 @@ export class PostRepositoryService {
     private postHttpService: PostHttpService
   ) {
     this.refreshList();
+    setInterval(() => {
+      this.refreshList();
+    }, 4000);
   }
 
   refreshList() {
@@ -42,5 +45,6 @@ export class PostRepositoryService {
 
   markAsDone(id: number) {
     this.done.add(id);
+    this.postHttpService.markAsDone(id);
   }
 }

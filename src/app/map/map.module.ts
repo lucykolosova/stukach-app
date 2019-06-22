@@ -9,7 +9,7 @@ import {AgmJsMarkerClustererModule, ClusterManager} from '@agm/js-marker-cluster
   imports: [
     CommonModule,
     AgmCoreModule.forRoot({
-      apiKey: 'AIzaSyAvHByMOVC1HHIcijAzWsaD4m3HECMC1oo'
+      apiKey: 'AIzaSyAi_K-aOvGFhhBTwwJH4Hwnzrbo-CHYTwY'
     }),
     AgmJsMarkerClustererModule
   ],

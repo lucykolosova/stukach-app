@@ -14,11 +14,7 @@ export interface MarkerData {
   car_number: string;
   photo_url: string;
   id: number;
-  location: {
-    latitude: number;
-    longitude: number;
-    user: number;
-  };
+  location: string;
 }
 
 @Injectable({
@@ -42,5 +38,11 @@ export class PostHttpService {
           id: data.id,
         } as Marker)))
       );
+  }
+
+  markAsDone(id) {
+    this.http.patch(`http://10.4.137.48:8000/process/${id}/`, {
+      processed: true,
+    }).subscribe();
   }
 }

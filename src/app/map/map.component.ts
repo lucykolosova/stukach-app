@@ -42,5 +42,9 @@ export class MapComponent implements OnInit {
   markAsDone(id: number) {
     this.postRepositoryService.markAsDone(id);
   }
+
+  trackById(a) {
+    return a.id;
+  }
 }
 

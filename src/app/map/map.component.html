@@ -10,7 +10,7 @@
     imagePath="https://raw.githubusercontent.com/googlemaps/v3-utility-library/master/markerclustererplus/images/m"
   >
     <agm-marker
-      *ngFor="let m of (postRepositoryService.all$ | async); let i = index"
+      *ngFor="let m of (postRepositoryService.all$ | async); let i = index; trackBy: trackById"
       [latitude]="m.lat"
       [longitude]="m.lng"
       [label]="i + 1">
