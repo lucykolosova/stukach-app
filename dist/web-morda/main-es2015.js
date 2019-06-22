@@ -269,9 +269,10 @@ __webpack_require__.r(__webpack_exports__);
 let PostHttpService = class PostHttpService {
     constructor(http) {
         this.http = http;
+        this.url = 'https://hackathon-ss-06-19.herokuapp.com/';
     }
     requestForList() {
-        return this.http.get('http://10.4.137.48:8000/get_all/')
+        return this.http.get(`${this.url}get_all/`)
             .pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_3__["map"])((res) => res.map((data) => ({
             lat: (JSON.parse(data.location)).latitude,
             lng: (JSON.parse(data.location)).longitude,
@@ -281,7 +282,7 @@ let PostHttpService = class PostHttpService {
         }))));
     }
     markAsDone(id) {
-        this.http.patch(`http://10.4.137.48:8000/process/${id}/`, {
+        this.http.patch(`${this.url}process/${id}/`, {
             processed: true,
         }).subscribe();
     }

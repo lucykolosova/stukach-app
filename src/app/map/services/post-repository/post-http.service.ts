@@ -22,13 +22,15 @@ export interface MarkerData {
 })
 export class PostHttpService {
 
+  private url = 'https://hackathon-ss-06-19.herokuapp.com/';
+
   constructor(
     private http: HttpClient,
   ) {
   }
 
   requestForList() {
-    return this.http.get<MarkerData[]>('http://10.4.137.48:8000/get_all/')
+    return this.http.get<MarkerData[]>(`${this.url}get_all/`)
       .pipe(
         map((res: MarkerData[]) => res.map((data: MarkerData) => ({
           lat: (JSON.parse(data.location)).latitude,
@@ -41,7 +43,7 @@ export class PostHttpService {
   }
 
   markAsDone(id) {
-    this.http.patch(`http://10.4.137.48:8000/process/${id}/`, {
+    this.http.patch(`${this.url}process/${id}/`, {
       processed: true,
     }).subscribe();
   }
